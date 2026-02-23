@@ -145,6 +145,16 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
+@app.get("/")
+def root():
+    return {
+        "message": "Biogas AI API is running! 🚀",
+        "docs": "/docs",
+        "status": "online"
+    }
+
+
 # Register Advanced AI Router
 from ai_intelligence.router import router as ai_router
 app.include_router(ai_router)
