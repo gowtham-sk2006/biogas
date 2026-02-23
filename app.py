@@ -101,10 +101,11 @@ async def lifespan(app: FastAPI):
     global _model
     # Load YOLO model
     logger.info("Loading model from %s …", MODEL_PATH)
-    if not MODEL_PATH.exists():
-        logger.error("Model file not found: %s", MODEL_PATH)
-        raise FileNotFoundError(f"Model not found at {MODEL_PATH}")
-    _model = YOLO(str(MODEL_PATH))
+    if not os.path.exists(MODEL_PATH):
+        logger.warning(f"Model file {MODEL_PATH} missing, loading default YOLO model (yolov8n.pt)")
+        _model = YOLO("yolov8n.pt")
+    else:
+        _model = YOLO(str(MODEL_PATH))
     _model.to("cpu")  # Force CPU
     logger.info("✓ Model loaded successfully (CPU-only mode)")
 
