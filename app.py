@@ -129,6 +129,10 @@ app.include_router(ai_router)
 from backend.physics_simulation.router import router as physics_router
 app.include_router(physics_router)
 
+# Register Advanced Engineering Router
+from backend.engineering_layer.router import router as engineering_router
+app.include_router(engineering_router)
+
 # ─── Helpers ──────────────────────────────────────────────────────────────────
 
 def _validate_image(file: UploadFile, view_name: str) -> None:
