@@ -93,8 +93,8 @@ export default function ParetoChart({ result }: { result: PredictResponse }) {
                                         />
                                         <Tooltip
                                             contentStyle={{ background: '#181818', border: '1px solid #333', borderRadius: 12, fontSize: 12 }}
-                                            formatter={(value: number, name: string) => [
-                                                `${value.toFixed(1)}${name === 'Yield' ? '%' : ' g/kg'}`,
+                                            formatter={(value: any, name: any) => [
+                                                `${Number(value).toFixed(1)}${name === 'Yield' ? '%' : ' g/kg'}`,
                                                 name,
                                             ]}
                                         />

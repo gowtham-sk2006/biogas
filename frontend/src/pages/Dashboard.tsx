@@ -22,7 +22,8 @@ import {
     ResponsiveContainer,
     Legend,
 } from 'recharts';
-import { predictPyrolysis, type PredictResponse } from '../api/client';
+import { predictPyrolysis } from '../api/client';
+import type { PredictResponse } from '../types';
 import { useAlerts } from '../components/AlertPanel';
 
 // ─── Animations ──────────────────────────────────────────────────

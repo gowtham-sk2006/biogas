@@ -70,7 +70,7 @@ export default function LifecycleComparison({ result }: { result: PredictRespons
                                         />
                                         <Tooltip
                                             contentStyle={{ background: '#181818', border: '1px solid #333', borderRadius: 12, fontSize: 12 }}
-                                            formatter={(val: number) => [`${val.toFixed(2)} kg CO₂`, 'Emission']}
+                                            formatter={(val: any) => [`${Number(val).toFixed(2)} kg CO₂`, 'Emission']}
                                         />
                                         <Bar dataKey="co2" radius={[6, 6, 0, 0]} animationDuration={1200}>
                                             {data.map((entry, i) => (

@@ -71,7 +71,7 @@ export default function GasCompositionCard({ result }: { result: PredictResponse
                             </Pie>
                             <Tooltip
                                 contentStyle={{ background: '#181818', border: '1px solid #333', borderRadius: 10, fontSize: 11 }}
-                                formatter={(val: number) => [`${val}%`, '']}
+                                formatter={(val: any) => [`${val}%`, '']}
                             />
                         </PieChart>
                     </ResponsiveContainer>

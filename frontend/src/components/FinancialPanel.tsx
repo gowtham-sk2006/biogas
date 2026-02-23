@@ -180,8 +180,8 @@ export default function FinancialPanel({ result }: Props) {
                                         <YAxis tick={{ fill: '#71717A', fontSize: 10 }} axisLine={false} />
                                         <Tooltip
                                             contentStyle={{ background: '#18181B', border: '1px solid #27272A', borderRadius: 8, fontSize: 12 }}
-                                            formatter={(value: number, name: string) => [
-                                                name === 'roi' ? `${value.toFixed(1)}%` : `$${value.toLocaleString(undefined, { maximumFractionDigits: 0 })}`,
+                                            formatter={(value: any, name: any) => [
+                                                name === 'roi' ? `${Number(value).toFixed(1)}%` : `$${Number(value).toLocaleString(undefined, { maximumFractionDigits: 0 })}`,
                                                 name === 'roi' ? 'ROI' : 'Cumulative Profit',
                                             ]}
                                         />

@@ -7,12 +7,13 @@ import {
     HiOutlineCheckCircle,
     HiOutlineExclamationTriangle,
 } from 'react-icons/hi2';
-import { predictPyrolysis, type PredictRequest, type PredictResponse } from '../api/client';
+import { predictPyrolysis } from '../api/client';
+import type { PredictPayload, PredictResponse } from '../types';
 
 const plasticTypes = ['PET', 'HDPE', 'LDPE', 'PP'];
 
 export default function PredictPage() {
-    const [form, setForm] = useState<PredictRequest>({
+    const [form, setForm] = useState<PredictPayload>({
         plastic_type: 'HDPE',
         weight: 5,
         mode: 'auto',
@@ -27,7 +28,7 @@ export default function PredictPage() {
         setLoading(true);
         setError('');
         try {
-            const payload: PredictRequest = {
+            const payload: PredictPayload = {
                 plastic_type: form.plastic_type,
                 weight: form.weight,
                 mode: form.mode,

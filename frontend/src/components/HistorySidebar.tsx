@@ -44,7 +44,7 @@ export function addToHistory(result: PredictResponse) {
         weightKg: result.weight_kg,
         yieldPct: result.predicted_yield_pct,
         emissionGPerKg: result.predicted_emission_g_per_kg,
-        risk: result.risk_level,
+        risk: result.predicted_risk_level || result.risk_level || 'Unknown',
         result,
     };
     // Remove duplicates and prepend

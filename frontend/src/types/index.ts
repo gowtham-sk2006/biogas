@@ -42,6 +42,7 @@ export interface DetectResponse {
 
 export interface MaterialInfo {
     plastic_type: string;
+    full_name?: string;
     density_g_cm3: number;
     thickness_range_mm: string;
     melting_point_c: number;
@@ -54,13 +55,16 @@ export interface Sustainability {
     grade: string;
     yield_efficiency: string;
     emission_rating: string;
+    risk_assessment?: string;
 }
 
 export interface RecommendedParams {
     temperature_c: number;
-    pressure_bar: number;
-    reaction_time_min: number;
-    efficiency_pct: number;
+    pressure_bar?: number;
+    pressure_atm?: number;
+    reaction_time_min?: number;
+    efficiency_pct?: number;
+    source?: string;
 }
 
 export interface PredictResponse {
@@ -70,10 +74,12 @@ export interface PredictResponse {
     objective?: string;
     predicted_yield_pct: number;
     predicted_emission_g_per_kg: number;
-    risk_level: string;
+    predicted_risk_level: string;
+    risk_level?: string; // legacy support
     sustainability: Sustainability;
     recommended_params: RecommendedParams;
     material_info: MaterialInfo;
+    optimization?: any;
 }
 
 export interface PredictPayload {

@@ -19,7 +19,7 @@ interface Props {
 // Animated counter hook
 function useAnimatedCounter(target: number, duration = 1200) {
     const [value, setValue] = useState(0);
-    const ref = useRef<number>();
+    const ref = useRef<number>(0);
     useEffect(() => {
         const start = 0;
         const startTime = performance.now();
