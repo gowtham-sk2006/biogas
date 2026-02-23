@@ -8,6 +8,7 @@ import {
     HiOutlineCheckCircle,
     HiOutlineExclamationTriangle,
     HiOutlineChevronDown,
+    HiOutlineSparkles,
 } from 'react-icons/hi2';
 import { detectPlastic } from '../api/client';
 import { useAlerts } from '../components/AlertPanel';
@@ -80,7 +81,7 @@ function BBoxOverlay({
                 const w = obj.bbox.x2 - obj.bbox.x1;
                 const h = obj.bbox.y2 - obj.bbox.y1;
                 const isPlastic = obj.class_name.toLowerCase().includes('plastic');
-                const color = isPlastic ? '#34d399' : '#f87171';
+                const color = isPlastic ? '#10B981' : '#f87171';
                 return (
                     <g key={i}>
                         <rect
@@ -186,7 +187,7 @@ function ConfidenceBar({
 
 // ─── Main Component ──────────────────────────────────────────────
 
-export default function DetectionPanel() {
+export default function DetectionPanel({ onNavigate }: { onNavigate?: (page: string, state?: any) => void }) {
     const [files, setFiles] = useState<Record<ViewName, File | null>>({
         front: null,
         back: null,
@@ -401,24 +402,46 @@ export default function DetectionPanel() {
                             className="space-y-5"
                         >
                             {/* Summary Bar */}
-                            <div className="glass-card p-4 flex items-center justify-between">
+                            <div className="glass-card p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                                 <div className="flex items-center gap-4">
                                     <span className="badge badge-success">
                                         {result.summary.total_detections} detections
                                     </span>
-                                    <span className="text-text-muted text-sm">
+                                    <span className="text-text-muted text-sm hidden sm:inline">
                                         {result.inference_time_ms.toFixed(0)}ms inference
                                     </span>
                                 </div>
                                 {result.summary.selected_plastic && (
-                                    <div className="flex items-center gap-2 text-sm">
-                                        <span className="text-text-secondary">Best:</span>
-                                        <span className="font-semibold text-accent-400">
-                                            {result.summary.selected_plastic.class_name}
-                                        </span>
-                                        <span className="text-text-muted">
-                                            ({(result.summary.selected_plastic.confidence * 100).toFixed(1)}%)
-                                        </span>
+                                    <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+                                        <div className="flex items-center gap-2 text-sm">
+                                            <span className="text-text-secondary">Best:</span>
+                                            <span className="font-semibold text-accent-400">
+                                                {result.summary.selected_plastic.class_name}
+                                            </span>
+                                            <span className="text-text-muted">
+                                                ({(result.summary.selected_plastic.confidence * 100).toFixed(1)}%)
+                                            </span>
+                                        </div>
+                                        {onNavigate && result.summary.selected_plastic.class_name.toLowerCase().includes('plastic') && result.summary.selected_plastic.confidence >= 0.50 ? (
+                                            <button
+                                                onClick={() => {
+                                                    const clsName = result.summary.selected_plastic!.class_name;
+                                                    // Parse out "HDPE Plastic" -> "HDPE"
+                                                    const typeString = clsName.split(' ')[0].toUpperCase();
+                                                    const targetType = ['PET', 'HDPE', 'LDPE', 'PP'].includes(typeString) ? typeString : 'HDPE';
+                                                    onNavigate('dashboard', { plasticType: targetType });
+                                                }}
+                                                className="btn-primary py-1.5 px-4 text-sm flex items-center gap-2 shadow-[0_0_15px_rgba(249,115,22,0.25)] animate-pulse"
+                                                style={{ animationDuration: '2s' }}
+                                            >
+                                                <HiOutlineSparkles />
+                                                Run Pyrolysis
+                                            </button>
+                                        ) : (
+                                            <span className="text-xs text-text-muted italic">
+                                                No high-confidence plastic detected
+                                            </span>
+                                        )}
                                     </div>
                                 )}
                             </div>

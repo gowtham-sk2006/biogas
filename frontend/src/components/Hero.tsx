@@ -46,7 +46,7 @@ export default function Hero({ onGetStarted }: HeroProps) {
                 className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[500px] pointer-events-none"
                 style={{
                     background:
-                        'radial-gradient(ellipse at center, rgba(99,102,241,0.12) 0%, rgba(16,185,129,0.06) 40%, transparent 70%)',
+                        'radial-gradient(ellipse at center, rgba(249,115,22,0.12) 0%, rgba(234,88,12,0.05) 40%, transparent 70%)',
                 }}
             />
 

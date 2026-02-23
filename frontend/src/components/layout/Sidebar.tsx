@@ -32,8 +32,8 @@ export default function Sidebar({ active, onNavigate }: SidebarProps) {
             transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
             className="fixed left-0 top-0 h-screen z-40 flex flex-col"
             style={{
-                background: 'linear-gradient(180deg, #0f0f17 0%, #0a0a0f 100%)',
-                borderRight: '1px solid rgba(99,102,241,0.08)',
+                background: 'linear-gradient(180deg, #09090B 0%, #050507 100%)',
+                borderRight: '1px solid rgba(249,115,22,0.08)',
             }}
         >
             {/* Logo */}
@@ -66,8 +66,8 @@ export default function Sidebar({ active, onNavigate }: SidebarProps) {
                             whileHover={{ x: 2 }}
                             whileTap={{ scale: 0.97 }}
                             className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors cursor-pointer ${isActive
-                                    ? 'bg-brand-500/15 text-brand-400'
-                                    : 'text-text-secondary hover:text-text-primary hover:bg-surface-700/50'
+                                ? 'bg-brand-500/15 text-brand-400'
+                                : 'text-text-secondary hover:text-text-primary hover:bg-surface-700/50'
                                 }`}
                         >
                             <item.icon className={`text-xl flex-shrink-0 ${isActive ? 'text-brand-400' : ''}`} />

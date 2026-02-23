@@ -21,7 +21,7 @@ from glob import glob
 # ─── Configuration ────────────────────────────────────────────────────────────
 BASE_DIR = Path(__file__).resolve().parent
 TRASHNET_DIR = BASE_DIR / "trashnet"
-PLASTIC_SRC = TRASHNET_DIR / "data" / "dataset-resized" / "plastic"
+DATASET_SRC = TRASHNET_DIR / "data" / "dataset-resized"
 YOLO_DATASET = BASE_DIR / "plastic_yolo_dataset"
 IMAGES_DIR = YOLO_DATASET / "images"
 LABELS_DIR = YOLO_DATASET / "labels"
@@ -30,7 +30,7 @@ MODEL_SAVE_PATH = BASE_DIR / "plastic_yolo.pt"
 
 TRAIN_RATIO = 0.80
 RANDOM_SEED = 42
-NUM_EPOCHS = 100
+NUM_EPOCHS = 20
 IMG_SIZE = 640
 BATCH_SIZE = 16
 MODEL_VARIANT = "yolov8n.pt"  # Nano — best for quick training + transfer learning
@@ -38,11 +38,11 @@ MODEL_VARIANT = "yolov8n.pt"  # Nano — best for quick training + transfer lear
 # ─── Step 1: Download TrashNet dataset ────────────────────────────────────────
 def download_dataset():
     """Clone the trashnet repository and extract the dataset zip if needed."""
-    global PLASTIC_SRC
+    global DATASET_SRC
 
     # If images already extracted, skip
-    if PLASTIC_SRC.exists() and any(PLASTIC_SRC.glob("*.jpg")):
-        print(f"[✓] Plastic images already present at {PLASTIC_SRC}")
+    if DATASET_SRC.exists() and any(DATASET_SRC.glob("*/*.jpg")):
+        print(f"[✓] Images already present at {DATASET_SRC}")
         return
 
     # Clone repo if not present
@@ -55,81 +55,88 @@ def download_dataset():
 
     # Extract the dataset zip
     dataset_zip = TRASHNET_DIR / "data" / "dataset-resized.zip"
-    dataset_extracted = TRASHNET_DIR / "data" / "dataset-resized"
-    if dataset_zip.exists() and not dataset_extracted.exists():
+    if dataset_zip.exists() and not DATASET_SRC.exists():
         import zipfile
         print("[↓] Extracting dataset-resized.zip …")
         with zipfile.ZipFile(dataset_zip, "r") as zf:
             zf.extractall(TRASHNET_DIR / "data")
         print("[✓] Extracted.")
 
-    # Verify plastic folder exists
-    if not PLASTIC_SRC.exists():
-        alt = TRASHNET_DIR / "data" / "plastic"
-        if alt.exists() and any(alt.glob("*.jpg")):
-            PLASTIC_SRC = alt
-        else:
-            print("[✗] Could not locate plastic images.")
-            sys.exit(1)
+    if not DATASET_SRC.exists():
+        print("[✗] Could not locate dataset-resized directory.")
+        sys.exit(1)
 
-    print(f"[✓] Dataset ready. Plastic images at {PLASTIC_SRC}")
+    print(f"[✓] Dataset ready at {DATASET_SRC}")
 
 
 # ─── Step 2 & 3: Convert to YOLO format + 80/20 split ────────────────────────
 def prepare_dataset():
     """
-    • Copy plastic images into YOLO directory structure.
-    • Create label files (class 0, full-image bbox).
+    • Iterate over all 6 classes in dataset-resized.
+    • Copy images into YOLO directory structure.
+    • Create label files (class_id, full-image bbox).
     • Split into train / val with 80/20 ratio.
     """
-    # Gather all .jpg images
-    image_paths = sorted(PLASTIC_SRC.glob("*.jpg"))
-    if not image_paths:
-        # also try .png
-        image_paths = sorted(PLASTIC_SRC.glob("*.png"))
-    if not image_paths:
-        print("[✗] No images found in", PLASTIC_SRC)
+    classes = sorted([d.name for d in DATASET_SRC.iterdir() if d.is_dir()])
+    print(f"[i] Found classes: {classes}")
+
+    if not classes:
+        print(f"[✗] No class directories found in {DATASET_SRC}")
         sys.exit(1)
 
-    print(f"[i] Found {len(image_paths)} plastic images")
+    # Clean existing YOLO dataset if any
+    if YOLO_DATASET.exists():
+        shutil.rmtree(YOLO_DATASET)
 
-    # Deterministic shuffle + split
-    random.seed(RANDOM_SEED)
-    random.shuffle(image_paths)
-    split_idx = int(TRAIN_RATIO * len(image_paths))
-    splits = {
-        "train": image_paths[:split_idx],
-        "val": image_paths[split_idx:],
-    }
+    total_train = 0
+    total_val = 0
 
-    for split_name, imgs in splits.items():
-        img_dir = IMAGES_DIR / split_name
-        lbl_dir = LABELS_DIR / split_name
-        img_dir.mkdir(parents=True, exist_ok=True)
-        lbl_dir.mkdir(parents=True, exist_ok=True)
+    for class_id, class_name in enumerate(classes):
+        class_dir = DATASET_SRC / class_name
+        image_paths = sorted(class_dir.glob("*.jpg"))
+        if not image_paths:
+            image_paths = sorted(class_dir.glob("*.png"))
+            
+        # Deterministic shuffle
+        random.seed(RANDOM_SEED)
+        random.shuffle(image_paths)
+        
+        split_idx = int(TRAIN_RATIO * len(image_paths))
+        splits = {
+            "train": image_paths[:split_idx],
+            "val": image_paths[split_idx:],
+        }
+        
+        total_train += len(splits["train"])
+        total_val += len(splits["val"])
 
-        for src_path in imgs:
-            dst_img = img_dir / src_path.name
-            dst_lbl = lbl_dir / src_path.with_suffix(".txt").name
+        for split_name, imgs in splits.items():
+            img_dir = IMAGES_DIR / split_name
+            lbl_dir = LABELS_DIR / split_name
+            img_dir.mkdir(parents=True, exist_ok=True)
+            lbl_dir.mkdir(parents=True, exist_ok=True)
 
-            shutil.copy2(src_path, dst_img)
+            for src_path in imgs:
+                dst_img = img_dir / f"{class_name}_{src_path.name}"
+                dst_lbl = lbl_dir / f"{class_name}_{src_path.with_suffix('.txt').name}"
 
-            # YOLO label: <class_id> <x_center> <y_center> <width> <height>
-            # Full-image bounding box (the entire image IS the plastic object)
-            with open(dst_lbl, "w") as f:
-                f.write("0 0.5 0.5 1.0 1.0\n")
+                shutil.copy2(src_path, dst_img)
 
-    print(f"[✓] Split: {len(splits['train'])} train / {len(splits['val'])} val")
+                # YOLO label: <class_id> <x_center> <y_center> <width> <height>
+                with open(dst_lbl, "w") as f:
+                    f.write(f"{class_id} 0.5 0.5 1.0 1.0\n")
+
+    print(f"[✓] Split: {total_train} train / {total_val} val across {len(classes)} classes")
 
     # ─── Write data.yaml ──────────────────────────────────────────────────
+    classes_str = ", ".join([f"'{c}'" for c in classes])
     yaml_content = (
         f"path: {YOLO_DATASET.as_posix()}\n"
         f"train: images/train\n"
         f"val: images/val\n"
-        f"nc: 1\n"
-        f"names: ['plastic']\n"
+        f"nc: {len(classes)}\n"
+        f"names: [{classes_str}]\n"
     )
-    DATA_YAML.parent.mkdir(parents=True, exist_ok=True)
     DATA_YAML.write_text(yaml_content, encoding="utf-8")
     print(f"[✓] data.yaml written to {DATA_YAML}")
 

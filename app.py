@@ -19,10 +19,10 @@ from PIL import Image
 from pydantic import BaseModel, Field
 from ultralytics import YOLO
 
-# ─── Configuration ────────────────────────────────────────────────────────────
+
 MODEL_PATH = Path(__file__).resolve().parent / "plastic_yolo.pt"
 ALLOWED_EXTENSIONS = {".jpg", ".jpeg", ".png", ".bmp", ".webp", ".tiff"}
-CONFIDENCE_THRESHOLD = 0.25
+CONFIDENCE_THRESHOLD = 0.20
 VIEW_NAMES = ("front", "back", "left", "right")
 
 logger = logging.getLogger("plastic_detector")
@@ -181,7 +181,7 @@ def _run_inference(model: YOLO, image: np.ndarray, view_name: str) -> ViewDetect
 
 
 def _aggregate(view_detections: list[ViewDetection]) -> DetectionSummary:
-    """Aggregate detections across all views and select the best one."""
+    """Aggregate detections across all views and select the best plastic detection."""
     all_dets: list[tuple[str, Detection]] = []
     for vd in view_detections:
         for obj in vd.objects:
@@ -192,7 +192,15 @@ def _aggregate(view_detections: list[ViewDetection]) -> DetectionSummary:
 
     selected: Optional[SelectedPlastic] = None
     if all_dets:
-        best_view, best_det = max(all_dets, key=lambda x: x[1].confidence)
+        # Prioritize any 'plastic' detection
+        plastic_dets = [d for d in all_dets if "plastic" in d[1].class_name.lower()]
+        
+        if plastic_dets:
+            best_view, best_det = max(plastic_dets, key=lambda x: x[1].confidence)
+        else:
+            # No plastic found — pick highest confidence detection regardless
+            best_view, best_det = max(all_dets, key=lambda x: x[1].confidence)
+            
         selected = SelectedPlastic(
             view=best_view,
             class_name=best_det.class_name,
@@ -271,11 +279,6 @@ async def detect_plastic(
         detections=view_detections,
         summary=summary,
     )
-
-
-# ═══════════════════════════════════════════════════════════════════════════════
-#  POST /predict — Pyrolysis Prediction & Optimization
-# ═══════════════════════════════════════════════════════════════════════════════
 
 from enum import Enum
 from optimize_pyrolysis import predict as ml_predict, optimize as ml_optimize

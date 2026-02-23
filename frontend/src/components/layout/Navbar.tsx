@@ -21,9 +21,9 @@ export default function Navbar({ active, onNavigate }: NavbarProps) {
         <nav
             className="fixed top-0 left-0 right-0 z-50 h-16 flex items-center justify-between px-6"
             style={{
-                background: 'rgba(10,10,15,0.82)',
+                background: 'rgba(9,9,11,0.88)',
                 backdropFilter: 'blur(14px) saturate(1.6)',
-                borderBottom: '1px solid rgba(99,102,241,0.08)',
+                borderBottom: '1px solid rgba(249,115,22,0.08)',
             }}
         >
             {/* Logo */}
@@ -43,8 +43,8 @@ export default function Navbar({ active, onNavigate }: NavbarProps) {
                         key={link.id}
                         onClick={() => onNavigate(link.id)}
                         className={`relative px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer ${active === link.id
-                                ? 'text-text-primary'
-                                : 'text-text-muted hover:text-text-secondary'
+                            ? 'text-text-primary'
+                            : 'text-text-muted hover:text-text-secondary'
                             }`}
                     >
                         {active === link.id && (

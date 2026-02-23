@@ -1,108 +1,104 @@
 import { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import Navbar from './components/layout/Navbar';
-import Footer from './components/layout/Footer';
-import Hero from './components/Hero';
-import { AlertProvider } from './components/AlertPanel';
-import Dashboard from './pages/Dashboard';
-import DetectionPanel from './pages/DetectionPanel';
-import PredictPage from './pages/PredictPage';
-
-// ─── Page Meta ───────────────────────────────────────────────────
-
-const pageMeta: Record<string, { title: string; subtitle: string }> = {
-  dashboard: {
-    title: 'Dashboard',
-    subtitle: 'Real-time pyrolysis analytics and optimization',
-  },
-  detect: {
-    title: 'Plastic Detection',
-    subtitle: 'AI-powered multi-view plastic recognition',
-  },
-  predict: {
-    title: 'Prediction Engine',
-    subtitle: 'Yield, emission & risk forecasting',
-  },
-};
-
-// ─── Page Wrapper ────────────────────────────────────────────────
-
-function PageWrapper({
-  title,
-  subtitle,
-  children,
-}: {
-  title: string;
-  subtitle: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 12 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -12 }}
-      transition={{ duration: 0.3 }}
-    >
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-text-primary">{title}</h1>
-        <p className="text-text-secondary text-sm mt-1">{subtitle}</p>
-      </div>
-      {children}
-    </motion.div>
-  );
-}
-
-// ─── App ─────────────────────────────────────────────────────────
+import Navbar from './components/Navbar';
+import Footer from './components/Footer';
+import ModeSelection from './components/ModeSelection';
+import ImageUploadMode from './components/ImageUploadMode';
+import ManualForm from './components/ManualForm';
+import PartialUpdate from './components/PartialUpdate';
+import Dashboard from './components/Dashboard';
+import HistorySidebar, { addToHistory } from './components/HistorySidebar';
+import type { AppMode, PredictResponse, DetectResponse } from './types';
 
 export default function App() {
-  const [page, setPage] = useState('home');
+  const [mode, setMode] = useState<AppMode>('landing');
+  const [result, setResult] = useState<PredictResponse | null>(null);
+  const [_detectionResult, setDetectionResult] = useState<DetectResponse | null>(null);
 
-  const meta = pageMeta[page];
+  const goToDashboard = (r: PredictResponse) => {
+    setResult(r);
+    setMode('dashboard');
+    addToHistory(r);
+  };
+
+  const handleImageConfirm = (plasticType: string, detResult: DetectResponse) => {
+    setDetectionResult(detResult);
+    // Auto-run prediction with detected plastic type
+    import('./api/client').then(({ predictPyrolysis }) => {
+      predictPyrolysis({ plastic_type: plasticType, weight: 5, mode: 'auto' })
+        .then(resp => goToDashboard(resp.data))
+        .catch(() => setMode('manual'));
+    });
+  };
+
+  const handleManualResult = (r: PredictResponse) => goToDashboard(r);
+  const handlePartialResult = (r: PredictResponse) => goToDashboard(r);
+
+  const handleHistoryLoad = (r: PredictResponse) => {
+    setResult(r);
+    setMode('dashboard');
+  };
+
+  const goLanding = () => setMode('landing');
 
   return (
-    <AlertProvider>
-      <div className="min-h-screen flex flex-col">
-        {/* Navbar */}
-        <Navbar active={page} onNavigate={setPage} />
+    <>
+      <Navbar />
+      <HistorySidebar onLoadResult={handleHistoryLoad} />
+      <main className="pt-14 min-h-screen">
+        <div className="max-w-7xl mx-auto px-6 py-8">
+          <AnimatePresence mode="wait">
+            {mode === 'landing' && (
+              <motion.div key="landing" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                <ModeSelection onSelect={setMode} />
+              </motion.div>
+            )}
 
-        {/* Content */}
-        <main className="flex-1 pt-16">
-          <div className="max-w-7xl mx-auto px-6">
-            <AnimatePresence mode="wait">
-              {page === 'home' && (
-                <motion.div
-                  key="home"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                >
-                  <Hero onGetStarted={() => setPage('dashboard')} />
-                </motion.div>
-              )}
+            {mode === 'image-upload' && (
+              <motion.div key="image-upload" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}>
+                <ImageUploadMode onConfirm={handleImageConfirm} onBack={goLanding} />
+              </motion.div>
+            )}
 
-              {page === 'dashboard' && meta && (
-                <PageWrapper key="dashboard" title={meta.title} subtitle={meta.subtitle}>
-                  <Dashboard />
-                </PageWrapper>
-              )}
+            {mode === 'manual' && (
+              <motion.div key="manual" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}>
+                <ManualForm onResult={handleManualResult} onBack={goLanding} />
+              </motion.div>
+            )}
 
-              {page === 'detect' && meta && (
-                <PageWrapper key="detect" title={meta.title} subtitle={meta.subtitle}>
-                  <DetectionPanel />
-                </PageWrapper>
-              )}
+            {mode === 'partial' && result && (
+              <motion.div key="partial" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}>
+                <PartialUpdate
+                  previousResult={result}
+                  onResult={handlePartialResult}
+                  onBack={() => setMode('dashboard')}
+                />
+              </motion.div>
+            )}
 
-              {page === 'predict' && meta && (
-                <PageWrapper key="predict" title={meta.title} subtitle={meta.subtitle}>
-                  <PredictPage />
-                </PageWrapper>
-              )}
-            </AnimatePresence>
+            {mode === 'partial' && !result && (
+              <motion.div key="no-prev" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                <div className="glass-card p-12 text-center max-w-lg mx-auto mt-20">
+                  <p className="text-text-secondary text-lg mb-4">No previous analysis found</p>
+                  <p className="text-text-muted text-sm mb-6">Run a full analysis first to use Partial Update</p>
+                  <button onClick={goLanding} className="btn-primary">Go Back</button>
+                </div>
+              </motion.div>
+            )}
 
-            <Footer />
-          </div>
-        </main>
-      </div>
-    </AlertProvider>
+            {mode === 'dashboard' && result && (
+              <motion.div key="dashboard" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                <Dashboard
+                  result={result}
+                  onBack={goLanding}
+                  onPartialUpdate={() => setMode('partial')}
+                />
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+        <Footer />
+      </main>
+    </>
   );
 }

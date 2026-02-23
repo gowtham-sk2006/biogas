@@ -185,8 +185,8 @@ const comparisonData = [
     { plastic: 'PP', yield: 44.8, emission: 78.6, risk: 30 },
 ];
 
-export default function Dashboard() {
-    const [plastic, setPlastic] = useState('HDPE');
+export default function Dashboard({ initialPlastic = 'HDPE' }: { initialPlastic?: string }) {
+    const [plastic, setPlastic] = useState(initialPlastic);
     const [weight, setWeight] = useState(5);
     const [mode, setMode] = useState<'auto' | 'manual'>('auto');
     const [temperature, setTemperature] = useState(450);
@@ -213,6 +213,13 @@ export default function Dashboard() {
         }
         setLoading(false);
     }, [plastic, weight, mode, temperature, pressure, addAlert]);
+
+    // Initial run on mount (instant) + scroll to top
+    useEffect(() => {
+        window.scrollTo(0, 0);
+        runPrediction();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     // Auto-predict on config change (debounced)
     useEffect(() => {
@@ -459,18 +466,18 @@ export default function Dashboard() {
                             <AreaChart data={sweepData}>
                                 <defs>
                                     <linearGradient id="yieldG" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="0%" stopColor="#6366f1" stopOpacity={0.35} />
-                                        <stop offset="100%" stopColor="#6366f1" stopOpacity={0} />
+                                        <stop offset="0%" stopColor="#F97316" stopOpacity={0.35} />
+                                        <stop offset="100%" stopColor="#F97316" stopOpacity={0} />
                                     </linearGradient>
                                 </defs>
-                                <CartesianGrid strokeDasharray="3 3" stroke="#1e1e2e" />
+                                <CartesianGrid strokeDasharray="3 3" stroke="#27272A" />
                                 <XAxis dataKey="temp" stroke="#64748b" fontSize={10} interval={2} />
                                 <YAxis stroke="#64748b" fontSize={10} />
                                 <Tooltip content={<ChartTooltip />} />
                                 <Area
                                     type="monotone"
                                     dataKey="yield"
-                                    stroke="#6366f1"
+                                    stroke="#F97316"
                                     fill="url(#yieldG)"
                                     strokeWidth={2}
                                     name="Yield %"
@@ -490,18 +497,18 @@ export default function Dashboard() {
                             <AreaChart data={sweepData}>
                                 <defs>
                                     <linearGradient id="emG" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="0%" stopColor="#34d399" stopOpacity={0.35} />
-                                        <stop offset="100%" stopColor="#34d399" stopOpacity={0} />
+                                        <stop offset="0%" stopColor="#10B981" stopOpacity={0.35} />
+                                        <stop offset="100%" stopColor="#10B981" stopOpacity={0} />
                                     </linearGradient>
                                 </defs>
-                                <CartesianGrid strokeDasharray="3 3" stroke="#1e1e2e" />
+                                <CartesianGrid strokeDasharray="3 3" stroke="#27272A" />
                                 <XAxis dataKey="temp" stroke="#64748b" fontSize={10} interval={2} />
                                 <YAxis stroke="#64748b" fontSize={10} />
                                 <Tooltip content={<ChartTooltip />} />
                                 <Area
                                     type="monotone"
                                     dataKey="emission"
-                                    stroke="#34d399"
+                                    stroke="#10B981"
                                     fill="url(#emG)"
                                     strokeWidth={2}
                                     name="CO₂ g/kg"
@@ -519,15 +526,15 @@ export default function Dashboard() {
                     <div className="h-52">
                         <ResponsiveContainer width="100%" height="100%">
                             <BarChart data={comparisonData} barGap={2}>
-                                <CartesianGrid strokeDasharray="3 3" stroke="#1e1e2e" />
+                                <CartesianGrid strokeDasharray="3 3" stroke="#27272A" />
                                 <XAxis dataKey="plastic" stroke="#64748b" fontSize={11} />
                                 <YAxis stroke="#64748b" fontSize={10} />
                                 <Tooltip content={<ChartTooltip />} />
                                 <Legend
                                     wrapperStyle={{ fontSize: 11, color: '#94a3b8' }}
                                 />
-                                <Bar dataKey="yield" name="Yield %" radius={[4, 4, 0, 0]} fill="#818cf8" />
-                                <Bar dataKey="emission" name="CO₂ g/kg" radius={[4, 4, 0, 0]} fill="#34d399" />
+                                <Bar dataKey="yield" name="Yield %" radius={[4, 4, 0, 0]} fill="#FB923C" />
+                                <Bar dataKey="emission" name="CO₂ g/kg" radius={[4, 4, 0, 0]} fill="#10B981" />
                             </BarChart>
                         </ResponsiveContainer>
                     </div>
