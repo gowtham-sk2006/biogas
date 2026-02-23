@@ -1,27 +1,23 @@
-# ─── Backend Dockerfile (CPU-Only, Railway Free Tier) ─────────
-# Lightweight Python 3.11-slim, no GPU/CUDA packages
 FROM python:3.11-slim
 
 WORKDIR /app
 
-# Minimal system deps for opencv-headless + pillow
+# Minimal OS deps for opencv-python-headless + Pillow
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    libgl1-mesa-glx libglib2.0-0 \
+    libglib2.0-0 \
     && rm -rf /var/lib/apt/lists/*
 
-# Force CPU-only mode
+# Force CPU-only
 ENV CUDA_VISIBLE_DEVICES=""
 ENV YOLO_VERBOSE="false"
 ENV OMP_NUM_THREADS=2
 ENV MKL_NUM_THREADS=2
 
-# Python dependencies (CPU-only torch from PyTorch CPU index)
+# Python deps
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt \
-    && pip cache purge \
-    && find /usr/local/lib/python3.11 -name '__pycache__' -type d -exec rm -rf {} + 2>/dev/null || true
+RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy backend source
+# Source
 COPY app.py .
 COPY optimize_pyrolysis.py .
 COPY material_properties.py .
@@ -29,12 +25,10 @@ COPY ai_intelligence/ ./ai_intelligence/
 COPY backend/ ./backend/
 COPY database/ ./database/
 
-# Copy ML model files
+# Models
 COPY *.pkl .
 COPY *.pt .
 
-# Railway provides $PORT
-ENV PORT=8000
 EXPOSE 8000
 
 CMD ["sh", "-c", "uvicorn app:app --host 0.0.0.0 --port ${PORT:-8000} --workers 1 --timeout-keep-alive 30"]
