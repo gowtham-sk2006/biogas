@@ -17,6 +17,11 @@ import LifecycleComparison from './LifecycleComparison';
 import GasCompositionCard from './GasCompositionCard';
 import ProcessGuide from './ProcessGuide';
 import MaterialInfo from './MaterialInfo';
+import AdvancedAISection from './AdvancedAISection';
+import PhysicsSimulationPanel from './PhysicsSimulationPanel';
+import EngineeringPanel from './EngineeringPanel';
+import SustainabilityPanel from './SustainabilityPanel';
+import FinancialPanel from './FinancialPanel';
 import { predictPyrolysis } from '../api/client';
 import type { PredictResponse, PredictPayload } from '../types';
 
@@ -244,10 +249,17 @@ export default function Dashboard({ result, onBack, onPartialUpdate }: Props) {
             <ProcessGuide result={r} />
 
             {/* Row 8: Material Info + Gas Composition */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
                 <MaterialInfo result={r} />
                 <GasCompositionCard result={r} />
             </div>
+
+            {/* ─── Advanced Dashboard Panels ─────────────────────────────── */}
+            <AdvancedAISection result={r} />
+            <PhysicsSimulationPanel result={r} />
+            <EngineeringPanel result={r} />
+            <SustainabilityPanel result={r} />
+            <FinancialPanel result={r} />
         </motion.div>
     );
 }

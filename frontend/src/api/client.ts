@@ -16,4 +16,21 @@ export const detectPlastic = (files: Record<string, File>) => {
 export const predictPyrolysis = (payload: PredictPayload) =>
     api.post<PredictResponse>('/predict', payload);
 
+/* ─── Advanced Dashboard Endpoints ─────────────────────────── */
+
+export const advancedAIOptimize = (payload: Record<string, unknown>) =>
+    api.post('/advanced-ai/optimize', payload);
+
+export const simulatePhysics = (payload: Record<string, unknown>) =>
+    api.post('/physics/simulate-physics', payload);
+
+export const advancedEngineering = (payload: Record<string, unknown>) =>
+    api.post('/engineering/advanced-engineering', payload);
+
+export const sustainabilityReport = (payload: Record<string, unknown>) =>
+    api.post('/sustainability/report', payload);
+
+export const financialAnalysis = (payload: Record<string, unknown>) =>
+    api.post('/financial/analysis', payload);
+
 export default api;
