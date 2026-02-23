@@ -75,8 +75,8 @@ export default function PredictPage() {
                             key={t}
                             onClick={() => setForm({ ...form, plastic_type: t })}
                             className={`py-2 rounded-lg text-sm font-medium transition-all cursor-pointer ${form.plastic_type === t
-                                    ? 'bg-brand-500/20 text-brand-400 border border-brand-500/40'
-                                    : 'bg-surface-800 text-text-secondary border border-surface-600 hover:border-surface-500'
+                                ? 'bg-brand-500/20 text-brand-400 border border-brand-500/40'
+                                : 'bg-surface-800 text-text-secondary border border-surface-600 hover:border-surface-500'
                                 }`}
                         >
                             {t}
@@ -103,8 +103,8 @@ export default function PredictPage() {
                             key={m}
                             onClick={() => setForm({ ...form, mode: m })}
                             className={`flex-1 py-2.5 rounded-lg text-sm font-medium flex items-center justify-center gap-2 transition-all cursor-pointer ${form.mode === m
-                                    ? 'bg-brand-500/20 text-brand-400 border border-brand-500/40'
-                                    : 'bg-surface-800 text-text-secondary border border-surface-600'
+                                ? 'bg-brand-500/20 text-brand-400 border border-brand-500/40'
+                                : 'bg-surface-800 text-text-secondary border border-surface-600'
                                 }`}
                         >
                             {m === 'auto' ? <HiOutlineArrowPath /> : <HiOutlineCog6Tooth />}

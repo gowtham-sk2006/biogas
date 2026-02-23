@@ -121,6 +121,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Register Advanced AI Router
+from ai_intelligence.router import router as ai_router
+app.include_router(ai_router)
 
 # ─── Helpers ──────────────────────────────────────────────────────────────────
 
