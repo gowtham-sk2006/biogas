@@ -125,6 +125,10 @@ app.add_middleware(
 from ai_intelligence.router import router as ai_router
 app.include_router(ai_router)
 
+# Register Physics Simulation Router
+from backend.physics_simulation.router import router as physics_router
+app.include_router(physics_router)
+
 # ─── Helpers ──────────────────────────────────────────────────────────────────
 
 def _validate_image(file: UploadFile, view_name: str) -> None:
