@@ -1,0 +1,31 @@
+# ─── Backend Dockerfile ───────────────────────────────────────
+# Serves the FastAPI backend on Railway
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# Install system deps for OpenCV (ultralytics)
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libgl1-mesa-glx libglib2.0-0 libsm6 libxrender1 libxext6 \
+    && rm -rf /var/lib/apt/lists/*
+
+# Python dependencies
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy backend source + models
+COPY app.py .
+COPY optimize_pyrolysis.py .
+COPY material_properties.py .
+COPY ai_intelligence/ ./ai_intelligence/
+COPY backend/ ./backend/
+
+# Copy ML model files
+COPY *.pkl .
+COPY *.pt .
+
+# Railway provides $PORT
+ENV PORT=8000
+EXPOSE 8000
+
+CMD ["sh", "-c", "uvicorn app:app --host 0.0.0.0 --port ${PORT:-8000}"]

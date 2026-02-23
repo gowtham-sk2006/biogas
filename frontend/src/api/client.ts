@@ -1,7 +1,12 @@
 import axios from 'axios';
 import type { DetectResponse, PredictResponse, PredictPayload, HealthResponse } from '../types';
 
-const api = axios.create({ baseURL: '/api', timeout: 60_000 });
+// In dev: Vite proxy rewrites /api → localhost:8000
+// In production (Railway): VITE_API_BASE_URL points to deployed backend
+const api = axios.create({
+    baseURL: import.meta.env.VITE_API_BASE_URL || '/api',
+    timeout: 60_000,
+});
 
 export const checkHealth = () => api.get<HealthResponse>('/health');
 
