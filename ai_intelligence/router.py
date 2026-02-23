@@ -31,7 +31,7 @@ class AdvancedOptimizeRequest(BaseModel):
     weight: float = Field(..., gt=0, description="Feedstock weight in kg")
     temperature: Optional[float] = Field(None, ge=200, le=800, description="Current temperature °C (for RL)")
     pressure: Optional[float] = Field(None, ge=0.5, le=20, description="Current pressure bar (for RL)")
-    n_trials: int = Field(default=80, ge=10, le=500, description="Bayesian optimization trials")
+    n_trials: int = Field(default=20, ge=10, le=100, description="Bayesian optimization trials")
     yield_weight: float = Field(default=0.6, ge=0, le=1, description="Yield priority weight")
     emission_weight: float = Field(default=0.4, ge=0, le=1, description="Emission penalty weight")
     enable_rl: bool = Field(default=True, description="Enable RL temperature recommendation")

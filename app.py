@@ -7,10 +7,15 @@ a POST /detect endpoint for multi-view plastic detection.
 
 import io
 import logging
+import os
 import time
 from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Optional
+
+# Force CPU-only — disable any GPU auto-detection
+os.environ["CUDA_VISIBLE_DEVICES"] = ""
+os.environ["YOLO_VERBOSE"] = "false"
 
 import numpy as np
 from fastapi import FastAPI, File, HTTPException, UploadFile
@@ -100,7 +105,8 @@ async def lifespan(app: FastAPI):
         logger.error("Model file not found: %s", MODEL_PATH)
         raise FileNotFoundError(f"Model not found at {MODEL_PATH}")
     _model = YOLO(str(MODEL_PATH))
-    logger.info("✓ Model loaded successfully")
+    _model.to("cpu")  # Force CPU
+    logger.info("✓ Model loaded successfully (CPU-only mode)")
 
     # Initialize database
     try:
@@ -190,9 +196,15 @@ async def _read_image(file: UploadFile) -> np.ndarray:
 
 
 def _run_inference(model: YOLO, image: np.ndarray, view_name: str) -> ViewDetection:
-    """Run YOLO on a single image and return structured detections."""
+    """Run YOLO on a single image using CPU only."""
     h, w = image.shape[:2]
-    results = model.predict(source=image, conf=CONFIDENCE_THRESHOLD, verbose=False)
+    results = model.predict(
+        source=image,
+        conf=CONFIDENCE_THRESHOLD,
+        verbose=False,
+        device="cpu",
+        half=False,  # No fp16 on CPU
+    )
 
     objects: list[Detection] = []
     for r in results:

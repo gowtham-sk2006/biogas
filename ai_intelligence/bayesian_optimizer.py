@@ -19,7 +19,7 @@ def bayesian_optimize(
     predict_fn,
     plastic_type: str,
     weight: float,
-    n_trials: int = 80,
+    n_trials: int = 20,
     yield_weight: float = 0.6,
     emission_weight: float = 0.4,
     temp_range: tuple[float, float] = (300.0, 600.0),
