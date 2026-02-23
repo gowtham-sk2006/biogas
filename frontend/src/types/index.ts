@@ -67,6 +67,7 @@ export interface PredictResponse {
     plastic_type: string;
     weight_kg: number;
     mode: string;
+    objective?: string;
     predicted_yield_pct: number;
     predicted_emission_g_per_kg: number;
     risk_level: string;
@@ -81,6 +82,7 @@ export interface PredictPayload {
     mode: 'auto' | 'manual';
     temperature?: number;
     pressure?: number;
+    objective?: 'max-yield' | 'min-emission' | 'max-profit' | 'balanced';
 }
 
 export interface HealthResponse {

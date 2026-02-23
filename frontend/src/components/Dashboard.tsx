@@ -26,14 +26,6 @@ interface Props {
     onPartialUpdate: () => void;
 }
 
-// Optimization goal → parameter adjustments
-const GOAL_ADJUSTMENTS: Record<OptimizationGoal, { tempDelta: number; pressureDelta: number }> = {
-    'max-yield': { tempDelta: 25, pressureDelta: 1 },
-    'min-emission': { tempDelta: -30, pressureDelta: -1 },
-    'max-profit': { tempDelta: 15, pressureDelta: 0.5 },
-    'balanced': { tempDelta: 0, pressureDelta: 0 },
-};
-
 function generateReport(result: PredictResponse): string {
     const temp = result.recommended_params?.temperature_c || 0;
     const pressure = result.recommended_params?.pressure_bar || 0;
@@ -113,7 +105,7 @@ export default function Dashboard({ result, onBack, onPartialUpdate }: Props) {
     // Detect contamination from mode string (heuristic)
     const isContaminated = result.mode?.toLowerCase().includes('contaminated') || false;
 
-    // When goal changes, recalculate via API
+    // When goal changes, recalculate via API with objective parameter
     useEffect(() => {
         if (goal === 'balanced') {
             setActiveResult(result);
@@ -124,17 +116,12 @@ export default function Dashboard({ result, onBack, onPartialUpdate }: Props) {
 
         debounceRef.current = setTimeout(async () => {
             setRecalculating(true);
-            const adj = GOAL_ADJUSTMENTS[goal];
-            const baseTemp = result.recommended_params?.temperature_c || 450;
-            const basePress = result.recommended_params?.pressure_bar || 5;
-
             try {
                 const payload: PredictPayload = {
                     plastic_type: result.plastic_type,
                     weight: result.weight_kg,
-                    mode: 'manual',
-                    temperature: Math.max(300, Math.min(600, baseTemp + adj.tempDelta)),
-                    pressure: Math.max(1, Math.min(10, basePress + adj.pressureDelta)),
+                    mode: 'auto',
+                    objective: goal,
                 };
                 const resp = await predictPyrolysis(payload);
                 setActiveResult(resp.data);

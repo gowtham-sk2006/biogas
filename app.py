@@ -290,12 +290,29 @@ class PredictionMode(str, Enum):
     manual = "manual"
 
 
+class OptimizationObjective(str, Enum):
+    max_yield = "max-yield"
+    min_emission = "min-emission"
+    max_profit = "max-profit"
+    balanced = "balanced"
+
+
+# Mapping: objective → (yield_weight, emission_weight)
+OBJECTIVE_WEIGHTS: dict[OptimizationObjective, tuple[float, float]] = {
+    OptimizationObjective.max_yield:    (0.90, 0.10),
+    OptimizationObjective.min_emission: (0.10, 0.90),
+    OptimizationObjective.max_profit:   (0.70, 0.30),
+    OptimizationObjective.balanced:     (0.60, 0.40),
+}
+
+
 class PredictRequest(BaseModel):
     plastic_type: str = Field(..., description="PET, HDPE, LDPE, or PP")
     weight: float = Field(..., gt=0, description="Feedstock weight in kg")
     mode: PredictionMode = Field(default=PredictionMode.auto, description="auto or manual")
     temperature: Optional[float] = Field(None, ge=200, le=800, description="Reactor temperature °C (required for manual)")
     pressure: Optional[float] = Field(None, ge=0.5, le=20, description="Reactor pressure atm (required for manual)")
+    objective: OptimizationObjective = Field(default=OptimizationObjective.balanced, description="Optimization goal")
 
 
 class RecommendedParams(BaseModel):
@@ -332,6 +349,7 @@ class PredictResponse(BaseModel):
     plastic_type: str
     weight_kg: float
     mode: str
+    objective: str = "balanced"
     predicted_yield_pct: float
     predicted_emission_g_per_kg: float
     predicted_risk_level: str
@@ -411,8 +429,9 @@ async def predict_pyrolysis(req: PredictRequest):
     optimization_info = None
 
     if req.mode == PredictionMode.auto:
-        # ── Auto: run optimizer ───────────────────────────────────────────
-        opt = ml_optimize(plastic_type=key, weight=req.weight)
+        # ── Auto: run optimizer with objective-driven weights ─────────────
+        yw, ew = OBJECTIVE_WEIGHTS.get(req.objective, (0.6, 0.4))
+        opt = ml_optimize(plastic_type=key, weight=req.weight, yield_weight=yw, emission_weight=ew)
 
         temperature = opt["optimal_temperature_c"]
         pressure = opt["optimal_pressure_atm"]
@@ -473,6 +492,7 @@ async def predict_pyrolysis(req: PredictRequest):
         plastic_type=key,
         weight_kg=req.weight,
         mode=req.mode.value,
+        objective=req.objective.value,
         predicted_yield_pct=yield_pct,
         predicted_emission_g_per_kg=emission,
         predicted_risk_level=risk,
