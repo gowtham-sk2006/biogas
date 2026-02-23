@@ -10,3 +10,8 @@ ultralytics>=8.0.0
 optuna>=3.0.0
 xgboost>=2.0.0
 shap>=0.44.0
+
+# Database (PostgreSQL on Railway)
+sqlalchemy[asyncio]>=2.0.0
+asyncpg>=0.29.0
+aiosqlite>=0.20.0

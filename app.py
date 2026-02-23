@@ -94,13 +94,30 @@ def get_model() -> YOLO:
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     global _model
+    # Load YOLO model
     logger.info("Loading model from %s …", MODEL_PATH)
     if not MODEL_PATH.exists():
         logger.error("Model file not found: %s", MODEL_PATH)
         raise FileNotFoundError(f"Model not found at {MODEL_PATH}")
     _model = YOLO(str(MODEL_PATH))
     logger.info("✓ Model loaded successfully")
+
+    # Initialize database
+    try:
+        from database.config import init_db, close_db
+        await init_db()
+        logger.info("✓ Database initialized")
+    except Exception as e:
+        logger.warning("Database init skipped: %s (app will work without DB)", e)
+
     yield
+
+    # Cleanup
+    try:
+        from database.config import close_db
+        await close_db()
+    except Exception:
+        pass
     _model = None
     logger.info("Model unloaded")
 
@@ -140,6 +157,10 @@ app.include_router(sustainability_router)
 # Register Financial Engine Router
 from backend.financial_engine.router import router as financial_router
 app.include_router(financial_router)
+
+# Register Database History Router
+from database.router import router as history_router
+app.include_router(history_router)
 
 # ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -507,7 +528,7 @@ async def predict_pyrolysis(req: PredictRequest):
         key, req.mode, yield_pct, emission, risk, sustainability.score,
     )
 
-    return PredictResponse(
+    response = PredictResponse(
         plastic_type=key,
         weight_kg=req.weight,
         mode=req.mode.value,
@@ -520,6 +541,17 @@ async def predict_pyrolysis(req: PredictRequest):
         material_info=mat_info,
         optimization=optimization_info,
     )
+
+    # Auto-save to database (non-blocking, failure-safe)
+    try:
+        from database.config import async_session
+        from database.crud import save_prediction
+        async with async_session() as db:
+            await save_prediction(db, response.model_dump())
+    except Exception as e:
+        logger.debug("DB save skipped: %s", e)
+
+    return response
 
 
 # ─── Entry point ──────────────────────────────────────────────────────────────
