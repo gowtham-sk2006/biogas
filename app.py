@@ -133,6 +133,10 @@ app.include_router(physics_router)
 from backend.engineering_layer.router import router as engineering_router
 app.include_router(engineering_router)
 
+# Register Sustainability Engine Router
+from backend.sustainability_engine.router import router as sustainability_router
+app.include_router(sustainability_router)
+
 # ─── Helpers ──────────────────────────────────────────────────────────────────
 
 def _validate_image(file: UploadFile, view_name: str) -> None:
