@@ -1,0 +1,191 @@
+@import "tailwindcss";
+
+/* ─── SaaS Dark Theme Design System ─────────────────────────────── */
+
+@theme {
+  --color-brand-50: #eef2ff;
+  --color-brand-100: #e0e7ff;
+  --color-brand-200: #c7d2fe;
+  --color-brand-300: #a5b4fc;
+  --color-brand-400: #818cf8;
+  --color-brand-500: #6366f1;
+  --color-brand-600: #4f46e5;
+  --color-brand-700: #4338ca;
+
+  --color-accent-400: #34d399;
+  --color-accent-500: #10b981;
+  --color-accent-600: #059669;
+
+  --color-warn-400: #fbbf24;
+  --color-warn-500: #f59e0b;
+
+  --color-danger-400: #f87171;
+  --color-danger-500: #ef4444;
+
+  --color-surface-950: #0a0a0f;
+  --color-surface-900: #0f0f17;
+  --color-surface-800: #151520;
+  --color-surface-700: #1e1e2e;
+  --color-surface-600: #2a2a3d;
+  --color-surface-500: #3a3a52;
+  --color-surface-400: #52526e;
+
+  --color-text-primary: #f1f5f9;
+  --color-text-secondary: #94a3b8;
+  --color-text-muted: #64748b;
+
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+}
+
+/* ─── Base Styles ─────────────────────────────────────────────────── */
+
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    font-family: var(--font-sans);
+    background-color: var(--color-surface-950);
+    color: var(--color-text-primary);
+    min-height: 100vh;
+    margin: 0;
+  }
+
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: var(--color-surface-900);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-surface-600);
+    border-radius: 3px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--color-surface-500);
+  }
+}
+
+/* ─── Component Utilities ─────────────────────────────────────────── */
+
+@layer utilities {
+  .glass-card {
+    background: linear-gradient(
+      135deg,
+      rgba(30, 30, 46, 0.8) 0%,
+      rgba(21, 21, 32, 0.9) 100%
+    );
+    border: 1px solid rgba(99, 102, 241, 0.12);
+    backdrop-filter: blur(16px);
+    border-radius: 16px;
+    box-shadow:
+      0 4px 24px rgba(0, 0, 0, 0.3),
+      0 0 0 1px rgba(255, 255, 255, 0.03) inset;
+  }
+
+  .glass-card-hover {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .glass-card-hover:hover {
+    border-color: rgba(99, 102, 241, 0.3);
+    box-shadow:
+      0 8px 32px rgba(99, 102, 241, 0.12),
+      0 0 0 1px rgba(255, 255, 255, 0.05) inset;
+    transform: translateY(-2px);
+  }
+
+  .gradient-text {
+    background: linear-gradient(135deg, #818cf8 0%, #34d399 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .glow-brand {
+    box-shadow: 0 0 20px rgba(99, 102, 241, 0.3), 0 0 60px rgba(99, 102, 241, 0.1);
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+    color: white;
+    font-weight: 600;
+    padding: 10px 24px;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 2px 12px rgba(99, 102, 241, 0.3);
+  }
+  .btn-primary:hover {
+    box-shadow: 0 4px 20px rgba(99, 102, 241, 0.5);
+    transform: translateY(-1px);
+  }
+
+  .btn-secondary {
+    background: var(--color-surface-700);
+    color: var(--color-text-primary);
+    font-weight: 500;
+    padding: 10px 24px;
+    border-radius: 10px;
+    border: 1px solid var(--color-surface-600);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-secondary:hover {
+    background: var(--color-surface-600);
+    border-color: var(--color-brand-500);
+  }
+
+  .input-field {
+    background: var(--color-surface-800);
+    border: 1px solid var(--color-surface-600);
+    color: var(--color-text-primary);
+    padding: 10px 14px;
+    border-radius: 10px;
+    font-size: 0.9rem;
+    outline: none;
+    transition: border-color 0.2s;
+    width: 100%;
+  }
+  .input-field:focus {
+    border-color: var(--color-brand-500);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 12px;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+  }
+  .badge-success {
+    background: rgba(16, 185, 129, 0.15);
+    color: #34d399;
+  }
+  .badge-warning {
+    background: rgba(245, 158, 11, 0.15);
+    color: #fbbf24;
+  }
+  .badge-danger {
+    background: rgba(239, 68, 68, 0.15);
+    color: #f87171;
+  }
+
+  .stat-value {
+    font-size: 2rem;
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: -0.02em;
+  }
+}

@@ -1,0 +1,5 @@
+path: C:/Users/ARUN N/OneDrive/Desktop/biogas/plastic_yolo_dataset
+train: images/train
+val: images/val
+nc: 1
+names: ['plastic']

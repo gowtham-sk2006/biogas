@@ -1,0 +1,42 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+dist/
+build/
+
+# ML Models & Data (large files)
+*.pt
+*.pkl
+*.h5
+*.onnx
+pyrolysis_dataset.csv
+runs/
+plastic_yolo_dataset/
+
+# Trashnet dataset (cloned separately)
+trashnet/
+
+# Node
+node_modules/
+frontend/node_modules/
+
+# Build output
+frontend/dist/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Env
+.env
+.env.local
