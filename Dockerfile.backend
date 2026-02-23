@@ -2,30 +2,28 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-# Minimal OS deps for opencv-python-headless + Pillow
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libglib2.0-0 \
+    libxcb1 \
+    libsm6 \
+    libxext6 \
+    libxrender1 \
     && rm -rf /var/lib/apt/lists/*
 
-# Force CPU-only
 ENV CUDA_VISIBLE_DEVICES=""
 ENV YOLO_VERBOSE="false"
 ENV OMP_NUM_THREADS=2
 ENV MKL_NUM_THREADS=2
 
-# Python deps
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Source
 COPY app.py .
 COPY optimize_pyrolysis.py .
 COPY material_properties.py .
 COPY ai_intelligence/ ./ai_intelligence/
 COPY backend/ ./backend/
 COPY database/ ./database/
-
-# Models
 COPY *.pkl .
 COPY *.pt .
 
