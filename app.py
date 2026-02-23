@@ -137,6 +137,10 @@ app.include_router(engineering_router)
 from backend.sustainability_engine.router import router as sustainability_router
 app.include_router(sustainability_router)
 
+# Register Financial Engine Router
+from backend.financial_engine.router import router as financial_router
+app.include_router(financial_router)
+
 # ─── Helpers ──────────────────────────────────────────────────────────────────
 
 def _validate_image(file: UploadFile, view_name: str) -> None:
