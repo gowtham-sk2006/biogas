@@ -5,8 +5,24 @@ SQLAlchemy ORM models for storing predictions and detections.
 """
 
 import datetime
-from sqlalchemy import Column, Integer, Float, String, DateTime, JSON, Text
+from sqlalchemy import Column, Integer, Float, String, DateTime, JSON, Text, Boolean
 from .config import Base
+
+class User(Base):
+    """Stores user accounts for authentication."""
+    __tablename__ = "users"
+    
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+    
+    email = Column(String(255), unique=True, index=True, nullable=False)
+    username = Column(String(50), unique=True, index=True, nullable=False)
+    full_name = Column(String(100), nullable=True)
+    organization = Column(String(100), nullable=True)
+    phone = Column(String(50), nullable=True)
+    
+    hashed_password = Column(String(255), nullable=False)
+    is_active = Column(Boolean, default=True)
 
 
 class PredictionRecord(Base):

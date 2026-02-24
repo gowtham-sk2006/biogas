@@ -20,6 +20,11 @@ export default function App() {
   const [result, setResult] = useState<PredictResponse | null>(null);
   const [_detectionResult, setDetectionResult] = useState<DetectResponse | null>(null);
 
+  useState(() => {
+    const token = localStorage.getItem('access_token');
+    if (token) setIsAuthenticated(true);
+  });
+
   const goToDashboard = (r: PredictResponse) => {
     setResult(r);
     setMode('dashboard');

@@ -10,6 +10,9 @@ const api = axios.create({
 
 export const checkHealth = () => api.get<HealthResponse>('/health');
 
+export const signup = (payload: any) => api.post('/auth/signup', payload);
+export const login = (payload: any) => api.post('/auth/login', payload);
+
 export const detectPlastic = (files: Record<string, File>) => {
     const fd = new FormData();
     Object.entries(files).forEach(([key, file]) => fd.append(key, file));

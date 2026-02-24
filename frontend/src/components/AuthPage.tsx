@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { Variants } from 'framer-motion';
 import { FiUser, FiMail, FiLock, FiBriefcase, FiPhone, FiArrowRight, FiCheckCircle } from 'react-icons/fi';
+import { login, signup } from '../api/client';
 
 interface AuthPageProps {
     onLogin: () => void;
@@ -10,15 +11,42 @@ interface AuthPageProps {
 export default function AuthPage({ onLogin }: AuthPageProps) {
     const [isLogin, setIsLogin] = useState(true);
     const [loading, setLoading] = useState(false);
+    const [errorMSG, setErrorMSG] = useState('');
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setLoading(true);
-        // Simulate network request
-        setTimeout(() => {
+        setErrorMSG('');
+
+        const formData = new FormData(e.currentTarget);
+        const data = Object.fromEntries(formData);
+
+        try {
+            if (isLogin) {
+                const res = await login({ login: data.login as string, password: data.password as string });
+                localStorage.setItem('access_token', res.data.access_token);
+                localStorage.setItem('user', JSON.stringify(res.data.user));
+            } else {
+                if (data.password !== data.confirm_password) {
+                    throw new Error("Passwords do not match");
+                }
+                const res = await signup({
+                    full_name: data.full_name as string,
+                    username: data.username as string,
+                    organization: data.organization as string,
+                    email: data.email as string,
+                    phone: data.phone ? (data.phone as string) : undefined,
+                    password: data.password as string
+                });
+                localStorage.setItem('access_token', res.data.access_token);
+                localStorage.setItem('user', JSON.stringify(res.data.user));
+            }
+            onLogin();
+        } catch (err: any) {
+            setErrorMSG(err.response?.data?.detail || err.message || "Authentication failed");
+        } finally {
             setLoading(false);
-            onLogin(); // Proceed to app
-        }, 1500);
+        }
     };
 
     const containerVariants: Variants = {
@@ -119,6 +147,12 @@ export default function AuthPage({ onLogin }: AuthPageProps) {
                             </div>
                         </div>
 
+                        {errorMSG && (
+                            <div className="bg-red-500/10 border border-red-500/50 text-red-400 text-sm px-4 py-3 rounded-xl mb-4 text-center">
+                                {errorMSG}
+                            </div>
+                        )}
+
                         <AnimatePresence mode="wait">
                             {isLogin ? (
                                 <motion.form
@@ -133,11 +167,11 @@ export default function AuthPage({ onLogin }: AuthPageProps) {
                                     <div className="space-y-4">
                                         <div className="relative">
                                             <FiMail className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40" />
-                                            <input type="text" placeholder="Email or Username" required className="w-full bg-black/40 border border-white/10 rounded-xl py-3 pl-12 pr-4 text-white focus:border-sky-400/50 focus:ring-1 focus:ring-sky-400/50 focus:outline-none transition-all placeholder:text-white/30" />
+                                            <input type="text" name="login" placeholder="Email or Username" required className="w-full bg-black/40 border border-white/10 rounded-xl py-3 pl-12 pr-4 text-white focus:border-sky-400/50 focus:ring-1 focus:ring-sky-400/50 focus:outline-none transition-all placeholder:text-white/30" />
                                         </div>
                                         <div className="relative">
                                             <FiLock className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40" />
-                                            <input type="password" placeholder="Password" required className="w-full bg-black/40 border border-white/10 rounded-xl py-3 pl-12 pr-4 text-white focus:border-sky-400/50 focus:ring-1 focus:ring-sky-400/50 focus:outline-none transition-all placeholder:text-white/30" />
+                                            <input type="password" name="password" placeholder="Password" required className="w-full bg-black/40 border border-white/10 rounded-xl py-3 pl-12 pr-4 text-white focus:border-sky-400/50 focus:ring-1 focus:ring-sky-400/50 focus:outline-none transition-all placeholder:text-white/30" />
                                         </div>
                                     </div>
 
@@ -189,38 +223,38 @@ export default function AuthPage({ onLogin }: AuthPageProps) {
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <div className="relative">
                                             <FiUser className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40" />
-                                            <input type="text" placeholder="Full Name" required className="w-full bg-black/40 border border-white/10 rounded-xl py-3 pl-12 pr-4 text-white focus:border-sky-400/50 focus:ring-1 focus:ring-sky-400/50 focus:outline-none transition-all placeholder:text-white/30 text-sm" />
+                                            <input type="text" name="full_name" placeholder="Full Name" required className="w-full bg-black/40 border border-white/10 rounded-xl py-3 pl-12 pr-4 text-white focus:border-sky-400/50 focus:ring-1 focus:ring-sky-400/50 focus:outline-none transition-all placeholder:text-white/30 text-sm" />
                                         </div>
                                         <div className="relative">
                                             <FiUser className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40" />
-                                            <input type="text" placeholder="Username" required className="w-full bg-black/40 border border-white/10 rounded-xl py-3 pl-12 pr-4 text-white focus:border-sky-400/50 focus:ring-1 focus:ring-sky-400/50 focus:outline-none transition-all placeholder:text-white/30 text-sm" />
+                                            <input type="text" name="username" placeholder="Username" required className="w-full bg-black/40 border border-white/10 rounded-xl py-3 pl-12 pr-4 text-white focus:border-sky-400/50 focus:ring-1 focus:ring-sky-400/50 focus:outline-none transition-all placeholder:text-white/30 text-sm" />
                                         </div>
                                     </div>
 
                                     <div className="relative">
                                         <FiBriefcase className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40" />
-                                        <input type="text" placeholder="Organization / Institution" required className="w-full bg-black/40 border border-white/10 rounded-xl py-3 pl-12 pr-4 text-white focus:border-sky-400/50 focus:ring-1 focus:ring-sky-400/50 focus:outline-none transition-all placeholder:text-white/30 text-sm" />
+                                        <input type="text" name="organization" placeholder="Organization / Institution" required className="w-full bg-black/40 border border-white/10 rounded-xl py-3 pl-12 pr-4 text-white focus:border-sky-400/50 focus:ring-1 focus:ring-sky-400/50 focus:outline-none transition-all placeholder:text-white/30 text-sm" />
                                     </div>
 
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <div className="relative">
                                             <FiMail className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40" />
-                                            <input type="email" placeholder="Email Address" required className="w-full bg-black/40 border border-white/10 rounded-xl py-3 pl-12 pr-4 text-white focus:border-sky-400/50 focus:ring-1 focus:ring-sky-400/50 focus:outline-none transition-all placeholder:text-white/30 text-sm" />
+                                            <input type="email" name="email" placeholder="Email Address" required className="w-full bg-black/40 border border-white/10 rounded-xl py-3 pl-12 pr-4 text-white focus:border-sky-400/50 focus:ring-1 focus:ring-sky-400/50 focus:outline-none transition-all placeholder:text-white/30 text-sm" />
                                         </div>
                                         <div className="relative">
                                             <FiPhone className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40" />
-                                            <input type="tel" placeholder="Phone Number (Optional)" className="w-full bg-black/40 border border-white/10 rounded-xl py-3 pl-12 pr-4 text-white focus:border-sky-400/50 focus:ring-1 focus:ring-sky-400/50 focus:outline-none transition-all placeholder:text-white/30 text-sm" />
+                                            <input type="tel" name="phone" placeholder="Phone Number (Optional)" className="w-full bg-black/40 border border-white/10 rounded-xl py-3 pl-12 pr-4 text-white focus:border-sky-400/50 focus:ring-1 focus:ring-sky-400/50 focus:outline-none transition-all placeholder:text-white/30 text-sm" />
                                         </div>
                                     </div>
 
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <div className="relative">
                                             <FiLock className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40" />
-                                            <input type="password" placeholder="Password" required className="w-full bg-black/40 border border-white/10 rounded-xl py-3 pl-12 pr-4 text-white focus:border-sky-400/50 focus:ring-1 focus:ring-sky-400/50 focus:outline-none transition-all placeholder:text-white/30 text-sm" />
+                                            <input type="password" name="password" placeholder="Password" required className="w-full bg-black/40 border border-white/10 rounded-xl py-3 pl-12 pr-4 text-white focus:border-sky-400/50 focus:ring-1 focus:ring-sky-400/50 focus:outline-none transition-all placeholder:text-white/30 text-sm" />
                                         </div>
                                         <div className="relative">
                                             <FiLock className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40" />
-                                            <input type="password" placeholder="Confirm Password" required className="w-full bg-black/40 border border-white/10 rounded-xl py-3 pl-12 pr-4 text-white focus:border-sky-400/50 focus:ring-1 focus:ring-sky-400/50 focus:outline-none transition-all placeholder:text-white/30 text-sm" />
+                                            <input type="password" name="confirm_password" placeholder="Confirm Password" required className="w-full bg-black/40 border border-white/10 rounded-xl py-3 pl-12 pr-4 text-white focus:border-sky-400/50 focus:ring-1 focus:ring-sky-400/50 focus:outline-none transition-all placeholder:text-white/30 text-sm" />
                                         </div>
                                     </div>
 
