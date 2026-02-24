@@ -7,12 +7,18 @@ venv/
 dist/
 build/
 
-# ML Models & Data (large files)
+# ML Models & Data (Allow specific essential models)
 *.pt
 *.pkl
 *.h5
 *.onnx
-pyrolysis_dataset.csv
+!plastic_yolo.pt
+!yield_model.pkl
+!emission_model.pkl
+!risk_model.pkl
+!plastic_label_encoder.pkl
+!risk_label_encoder.pkl
+!pyrolysis_dataset.csv
 runs/
 plastic_yolo_dataset/
 
