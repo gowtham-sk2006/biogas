@@ -18,11 +18,13 @@ os.environ["CUDA_VISIBLE_DEVICES"] = ""
 os.environ["YOLO_VERBOSE"] = "false"
 
 import numpy as np
-from fastapi import FastAPI, File, HTTPException, UploadFile
+from fastapi import FastAPI, File, HTTPException, UploadFile, Request
+from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from PIL import Image
 from pydantic import BaseModel, Field
 from ultralytics import YOLO
+import traceback
 
 
 MODEL_PATH = Path(__file__).resolve().parent / "plastic_yolo.pt"
@@ -144,6 +146,35 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    """
+    Global exception handler that captures ANY unhandled error,
+    logs the traceback, and returns a JSON response with CORS headers.
+    This prevents 'ghost' CORS errors when the server crashes.
+    """
+    tb = traceback.format_exc()
+    logger.error("Unhandled Exception: %s\n%s", exc, tb)
+    
+    # Manually define CORS headers because CORSMiddleware 
+    # might be bypassed in some crash scenarios
+    headers = {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "*",
+        "Access-Control-Allow-Headers": "*",
+    }
+    
+    return JSONResponse(
+        status_code=500,
+        content={
+            "success": False,
+            "error": "Internal Server Error",
+            "detail": str(exc),
+            "traceback": tb if os.getenv("DEBUG", "false").lower() == "true" else None
+        },
+        headers=headers
+    )
 
 
 @app.get("/")
