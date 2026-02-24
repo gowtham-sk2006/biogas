@@ -12,6 +12,8 @@ import time
 from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Optional
+import hashlib
+import random
 
 # Force CPU-only — disable any GPU auto-detection
 os.environ["CUDA_VISIBLE_DEVICES"] = ""
@@ -383,6 +385,67 @@ async def detect_plastic(
         detections=view_detections,
         summary=summary,
     )
+
+@app.post("/demo/predict", tags=["Detection"])
+async def demo_detect_plastic(
+    front: UploadFile = File(..., description="Front view image"),
+    back: UploadFile = File(..., description="Back view image"),
+    left: UploadFile = File(..., description="Left view image"),
+    right: UploadFile = File(..., description="Right view image"),
+):
+    """
+    Deterministic demo mode. Extracts bytes from the front image, hashes them to seed the RNG, 
+    and returns a guaranteed pseudo-random but consistently reproduced plastic classification.
+    """
+    uploads = {"front": front, "back": back, "left": left, "right": right}
+    
+    # Validate images so we don't proceed with garbage
+    for view_name, file in uploads.items():
+        _validate_image(file, view_name)
+    
+    # Read the front image to generate our seed
+    await front.seek(0)
+    front_bytes = await front.read()
+    
+    # Create deterministic seed from image bytes
+    # Different image -> different hash -> different results
+    # Same image -> same hash -> same results
+    hash_obj = hashlib.md5(front_bytes)
+    seed = int(hash_obj.hexdigest(), 16)
+    
+    # Seed the random number generator
+    random.seed(seed)
+    
+    plastics = ["HDPE", "LDPE", "PET", "PP", "Mixed Plastic"]
+    # We heavily weight true plastics for demo purposes, 
+    # but still give varied results
+    selected_plastic = random.choices(
+        plastics, 
+        weights=[30, 20, 25, 15, 10], 
+        k=1
+    )[0]
+    
+    # Generate realistic pseudo-random values
+    confidence = round(random.uniform(0.82, 0.97), 4)
+    # realistic yields 60-85%
+    yield_pct = round(random.uniform(60.0, 85.0), 1) 
+    
+    # Create fake but realistic CO2 and energy data
+    co2_saved = round(random.uniform(1.2, 2.5), 1)
+    energy_recovery = round(random.uniform(30.0, 45.0), 1)
+    
+    return {
+        "success": True,
+        "is_demo": True,
+        "plastic_type": selected_plastic,
+        "confidence": confidence,
+        "estimated_yield_pct": yield_pct,
+        "carbon_reduction_kg": co2_saved,
+        "energy_recovery_mj_kg": energy_recovery,
+        "message": f"Demo Mode: Detected {selected_plastic} with {confidence*100:.1f}% confidence."
+    }
+
+
 
 
 # ─── Chatbot endpoint ─────────────────────────────────────────────────────────
