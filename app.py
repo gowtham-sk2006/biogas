@@ -30,8 +30,8 @@ import traceback
 import os
 import httpx
 
-# chat support
-CHAT_API_URL = os.getenv("GROK_API_URL", "https://api.x.ai/v1/chat/completions")
+# chat support (Using Groq as the provider based on user key prefix)
+CHAT_API_URL = os.getenv("GROK_API_URL", "https://api.groq.com/openai/v1/chat/completions")
 # Using string splitting to prevent GitHub from auto-revoking the key
 _user_key = "gsk_fC43J9snI0y" + "g1cew7K9LWGdyb3FY" + "2lQAIz1CZqMT3LgvdjWeXbqF"
 CHAT_API_KEY = os.getenv("GROK_API_KEY", _user_key)
@@ -476,15 +476,32 @@ async def chat(req: ChatRequest):
         "messages": [
             {
                 "role": "system",
-                "content": "You are a professional AI Pyrolysis Assistant for a Plastic-to-Biogas Digital Twin platform. Provide helpful, accurate, and concise answers about pyrolysis, sustainability, plastic waste management, and process optimization."
+                "content": """You are the Senior Pyrolysis Engineer for the Biogas Digital Twin platform. 
+                You have deep expertise in Thermal Degradation, Polymer Science, and Renewable Energy.
+                
+                TECHNICAL KNOWLEDGE BASE:
+                - PET (Polyethylene terephthalate): Best at 350-500°C. Heavy wax/liquid output.
+                - HDPE/LDPE: Best at 450-600°C. Produces high-quality bio-oil and combustible gases.
+                - PP (Polypropylene): Optimal at 450-550°C. Very high gas yield.
+                - PVC: Dangerous (Chlorine release). Always warn against high PVC content without scrubbing.
+                - Catalysts: HZSM-5 or Alumina increases gas yield and reduces reaction time.
+                - Efficiency: Higher temperatures (600°C+) favor gas yield; lower temperatures (400°C) favor liquid bio-oil.
+                - Sustainability: Pyrolysis saves approx 1.5 - 2.5kg of CO2 per kg of plastic vs incineration.
+                
+                GUIDELINES:
+                - Provide specific temperature and pressure recommendations.
+                - Use a professional, tech-focused tone.
+                - If asked about the 'Digital Twin', refer to our real-time simulation and YOLO detection capabilities.
+                - Keep responses concise but data-rich."""
             },
             {
                 "role": "user",
                 "content": req.message
             }
         ],
-        "model": "grok-2-latest",
-        "temperature": 0.5,
+        "model": "llama-3.3-70b-versatile",
+        "temperature": 0.7,
+        "max_tokens": 1024,
         "stream": False
     }
 
