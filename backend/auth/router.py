@@ -6,6 +6,7 @@ from sqlalchemy.future import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from passlib.context import CryptContext
 import jwt
+import hashlib
 
 from database.config import get_db
 from database.models import User
@@ -23,10 +24,14 @@ ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7 # 7 days
 
 def verify_password(plain_password, hashed_password):
-    return pwd_context.verify(plain_password, hashed_password)
+    # SHA-256 pre-hashing to bypass bcrypt 72-byte limit
+    pre_hash = hashlib.sha256(plain_password.encode('utf-8')).hexdigest()
+    return pwd_context.verify(pre_hash, hashed_password)
 
 def get_password_hash(password):
-    return pwd_context.hash(password)
+    # SHA-256 pre-hashing to bypass bcrypt 72-byte limit
+    pre_hash = hashlib.sha256(password.encode('utf-8')).hexdigest()
+    return pwd_context.hash(pre_hash)
 
 def create_access_token(data: dict, expires_delta: timedelta | None = None):
     to_encode = data.copy()
