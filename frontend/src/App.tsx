@@ -8,9 +8,11 @@ import ManualForm from './components/ManualForm';
 import PartialUpdate from './components/PartialUpdate';
 import Dashboard from './components/Dashboard';
 import HistorySidebar, { addToHistory } from './components/HistorySidebar';
+import IntroAnimation from './components/IntroAnimation';
 import type { AppMode, PredictResponse, DetectResponse } from './types';
 
 export default function App() {
+  const [showIntro, setShowIntro] = useState(true);
   const [mode, setMode] = useState<AppMode>('landing');
   const [result, setResult] = useState<PredictResponse | null>(null);
   const [_detectionResult, setDetectionResult] = useState<DetectResponse | null>(null);
@@ -43,62 +45,72 @@ export default function App() {
 
   return (
     <>
-      <Navbar />
-      <HistorySidebar onLoadResult={handleHistoryLoad} />
-      <main className="pt-14 min-h-screen">
-        <div className="max-w-7xl mx-auto px-6 py-8">
-          <AnimatePresence mode="wait">
-            {mode === 'landing' && (
-              <motion.div key="landing" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                <ModeSelection onSelect={setMode} />
-              </motion.div>
-            )}
+      <AnimatePresence>
+        {showIntro && (
+          <IntroAnimation key="intro" onComplete={() => setShowIntro(false)} />
+        )}
+      </AnimatePresence>
 
-            {mode === 'image-upload' && (
-              <motion.div key="image-upload" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}>
-                <ImageUploadMode onConfirm={handleImageConfirm} onBack={goLanding} />
-              </motion.div>
-            )}
+      {!showIntro && (
+        <>
+          <Navbar />
+          <HistorySidebar onLoadResult={handleHistoryLoad} />
+          <main className="pt-14 min-h-screen">
+            <div className="max-w-7xl mx-auto px-6 py-8">
+              <AnimatePresence mode="wait">
+                {mode === 'landing' && (
+                  <motion.div key="landing" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                    <ModeSelection onSelect={setMode} />
+                  </motion.div>
+                )}
 
-            {mode === 'manual' && (
-              <motion.div key="manual" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}>
-                <ManualForm onResult={handleManualResult} onBack={goLanding} />
-              </motion.div>
-            )}
+                {mode === 'image-upload' && (
+                  <motion.div key="image-upload" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}>
+                    <ImageUploadMode onConfirm={handleImageConfirm} onBack={goLanding} />
+                  </motion.div>
+                )}
 
-            {mode === 'partial' && result && (
-              <motion.div key="partial" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}>
-                <PartialUpdate
-                  previousResult={result}
-                  onResult={handlePartialResult}
-                  onBack={() => setMode('dashboard')}
-                />
-              </motion.div>
-            )}
+                {mode === 'manual' && (
+                  <motion.div key="manual" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}>
+                    <ManualForm onResult={handleManualResult} onBack={goLanding} />
+                  </motion.div>
+                )}
 
-            {mode === 'partial' && !result && (
-              <motion.div key="no-prev" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                <div className="glass-card p-12 text-center max-w-lg mx-auto mt-20">
-                  <p className="text-text-secondary text-lg mb-4">No previous analysis found</p>
-                  <p className="text-text-muted text-sm mb-6">Run a full analysis first to use Partial Update</p>
-                  <button onClick={goLanding} className="btn-primary">Go Back</button>
-                </div>
-              </motion.div>
-            )}
+                {mode === 'partial' && result && (
+                  <motion.div key="partial" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}>
+                    <PartialUpdate
+                      previousResult={result}
+                      onResult={handlePartialResult}
+                      onBack={() => setMode('dashboard')}
+                    />
+                  </motion.div>
+                )}
 
-            {mode === 'dashboard' && result && (
-              <motion.div key="dashboard" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                <Dashboard
-                  result={result}
-                  onBack={goLanding}
-                  onPartialUpdate={() => setMode('partial')}
-                />
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
-        <Footer />
-      </main>
+                {mode === 'partial' && !result && (
+                  <motion.div key="no-prev" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                    <div className="glass-card p-12 text-center max-w-lg mx-auto mt-20">
+                      <p className="text-text-secondary text-lg mb-4">No previous analysis found</p>
+                      <p className="text-text-muted text-sm mb-6">Run a full analysis first to use Partial Update</p>
+                      <button onClick={goLanding} className="btn-primary">Go Back</button>
+                    </div>
+                  </motion.div>
+                )}
+
+                {mode === 'dashboard' && result && (
+                  <motion.div key="dashboard" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                    <Dashboard
+                      result={result}
+                      onBack={goLanding}
+                      onPartialUpdate={() => setMode('partial')}
+                    />
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+            <Footer />
+          </main>
+        </>
+      )}
     </>
   );
 }
