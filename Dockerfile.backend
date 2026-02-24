@@ -11,6 +11,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libxrender1 \
     && rm -rf /var/lib/apt/lists/*
 
+
 ENV CUDA_VISIBLE_DEVICES=""
 ENV YOLO_VERBOSE="false"
 ENV OMP_NUM_THREADS=2

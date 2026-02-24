@@ -21,10 +21,20 @@ import numpy as np
 from fastapi import FastAPI, File, HTTPException, UploadFile, Request
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
-from PIL import Image
 from pydantic import BaseModel, Field
+from PIL import Image
 from ultralytics import YOLO
 import traceback
+import os
+import httpx
+
+# chat support
+CHAT_API_URL = os.getenv("GROK_API_URL", "https://api.grok.ai/v1/complete")
+CHAT_API_KEY = os.getenv("GROK_API_KEY")
+if CHAT_API_KEY is None:
+    # warn at startup but do not crash; /chat will return 503
+    logger = logging.getLogger(__name__)
+    logger.warning("GROK_API_KEY not set; chat endpoint will be disabled")
 
 
 MODEL_PATH = Path(__file__).resolve().parent / "plastic_yolo.pt"
@@ -373,6 +383,32 @@ async def detect_plastic(
         detections=view_detections,
         summary=summary,
     )
+
+
+# ─── Chatbot endpoint ─────────────────────────────────────────────────────────
+class ChatRequest(BaseModel):
+    message: str
+
+class ChatResponse(BaseModel):
+    success: bool = True
+    reply: str
+
+@app.post("/chat", response_model=ChatResponse, tags=["Chat"])
+async def chat(req: ChatRequest):
+    """Proxy user message to the Grok API and return its reply."""
+    if CHAT_API_KEY is None:
+        raise HTTPException(status_code=503, detail="Chat API key not configured")
+
+    headers = {"Authorization": f"Bearer {CHAT_API_KEY}", "Content-Type": "application/json"}
+    payload = {"prompt": req.message}
+    async with httpx.AsyncClient(timeout=30) as client:
+        resp = await client.post(CHAT_API_URL, headers=headers, json=payload)
+    if resp.status_code != 200:
+        raise HTTPException(status_code=502, detail="Upstream chat service error")
+    data = resp.json()
+    # adjust according to actual response schema from Grok.
+    reply = data.get("text") or data.get("reply") or str(data)
+    return ChatResponse(reply=reply)
 
 from enum import Enum
 from optimize_pyrolysis import predict as ml_predict, optimize as ml_optimize

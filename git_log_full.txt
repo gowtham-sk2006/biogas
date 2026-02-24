@@ -1,0 +1,20 @@
+aa404af40e31d7ada2ae266b6b8e3104a6166ba6 fix(docker): reinstall libgl1 & support libs for opencv headless
+bbc61f56ea29181f4963f55c8106d7f859c2e3e3 fix: safe unpickling for numpy RNG (MT19937) and use safe loader for model files
+7d7fad25fbb56c6e646be44d0bb5751005905323 fix(docker): add libgl1 to fix opencv ImportError
+13800f3c8cd340970f09f899f7048da5e7d4b635 fix(backend): stabilize numpy and ultralytics versions to resolve 'Numpy is not available' error
+40f7ddcbc82d5d933cabc2765a53e7f3a5a35611 fix(backend): include essential ML model files for production deployment
+0aa9f45808cf70d61632e749bb85d91dd7b30f6c fix(backend): add global exception handler with manual CORS headers to reveal 500 errors
+1eda6ae0c02444742d3debe5665028c4046ef06a fix: set allow_credentials=False for wildcard CORS to stop browser blocking
+499bcfd10353c1a3754f7612c5545c1db7ac8d26 fix: bind serve directly to raw  without fallbacks
+912767d377a81240761d46cf0cd4cf9ab0af9c85 fix: pass explicit port to serve command using -l flag for Railway 502 fix
+eae43cde719596890baffc78fb840d85851e9b75 fix: simplify serve command and add native start script
+81ff99f5e31ed16e2885865475dbb46c68d4b86a fix: switch preview server to serve for production routing
+10700d37f17df6d26e29e6e6d715f5d19db613c7 fix: bind vite preview to 0.0.0.0 and PORT for Railway
+92a07237e4194c4d587368c39e4cde10dae2d67b fix: resolve frontend TypeScript strict mode errors in Recharts tooltips and api types
+17fb0b58548bffa887ebbd746122b2fe3ac0680a feat: add root endpoint / to return API status and prevent 404 on base URL
+7943975f606c9471628762d2757e7c217d9b09f7 fix: pin numpy to 1.26.4 for torch compatibility and add YOLO fallback model if plastic_yolo.pt is missing
+26bd1634af5b3e3c43c63e076748535ec5a3605f fix: correctly handle opencv-python-headless to prevent cv2 ModuleNotFoundError
+fe113e6f32c12b093d1df74efcf9cc32574ebf5f fix: force opencv-python-headless over opencv-python to fix libGL.so.1 crash on Railway
+5bed36b56db25b194f2ba99b4429ac0490fbb9bb fix: optimize Dockerfiles and nginx config for Railway production deployment
+00adf5d01161bf2e641ec3837d8a07b6b69f18be fix: add libxcb1 libsm6 libxext6 libxrender1 to fix libxcb.so.1 crash
+cf776ae3c68b35112be9f80b6308d7d49906faaa fix: replace libgl1-mesa-glx with libglib2.0-0 only for Bookworm compatibility
