@@ -224,10 +224,6 @@ app.include_router(financial_router)
 from database.router import router as history_router
 app.include_router(history_router)
 
-# Register Authentication Router
-from backend.auth.router import router as auth_router
-app.include_router(auth_router)
-
 # ─── Helpers ──────────────────────────────────────────────────────────────────
 
 def _validate_image(file: UploadFile, view_name: str) -> None:

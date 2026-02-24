@@ -1,6 +1,5 @@
 import { motion } from 'framer-motion';
 import { HiOutlineCpuChip } from 'react-icons/hi2';
-import { FiLogOut } from 'react-icons/fi';
 import { useState, useEffect } from 'react';
 import { checkHealth } from '../api/client';
 
@@ -39,23 +38,9 @@ export default function Navbar() {
                 <span className="badge badge-accent text-[10px]">v2.0</span>
             </div>
 
-            <div className="flex items-center gap-4 text-xs text-text-secondary">
-                <div className="flex items-center gap-2">
-                    <div className={`w-2 h-2 rounded-full ${dot} ${status === 'online' ? 'animate-pulse' : ''}`} />
-                    <span className="capitalize">{status === 'online' ? 'AI Online' : status}</span>
-                </div>
-
-                <button
-                    onClick={() => {
-                        localStorage.removeItem('access_token');
-                        localStorage.removeItem('user');
-                        window.location.reload();
-                    }}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 transition-colors border border-red-500/20"
-                >
-                    <FiLogOut className="w-3.5 h-3.5" />
-                    Logout
-                </button>
+            <div className="flex items-center gap-2 text-xs text-text-secondary">
+                <div className={`w-2 h-2 rounded-full ${dot} ${status === 'online' ? 'animate-pulse' : ''}`} />
+                <span className="capitalize">{status === 'online' ? 'AI Online' : status}</span>
             </div>
         </motion.nav>
     );

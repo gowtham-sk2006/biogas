@@ -10,20 +10,13 @@ import Dashboard from './components/Dashboard';
 import HistorySidebar, { addToHistory } from './components/HistorySidebar';
 import IntroAnimation from './components/IntroAnimation';
 import ChatBot from './components/ChatBot';
-import AuthPage from './components/AuthPage';
 import type { AppMode, PredictResponse, DetectResponse } from './types';
 
 export default function App() {
   const [showIntro, setShowIntro] = useState(true);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [mode, setMode] = useState<AppMode>('landing');
   const [result, setResult] = useState<PredictResponse | null>(null);
   const [_detectionResult, setDetectionResult] = useState<DetectResponse | null>(null);
-
-  useState(() => {
-    const token = localStorage.getItem('access_token');
-    if (token) setIsAuthenticated(true);
-  });
 
   const goToDashboard = (r: PredictResponse) => {
     setResult(r);
@@ -59,11 +52,7 @@ export default function App() {
         )}
       </AnimatePresence>
 
-      {!showIntro && !isAuthenticated && (
-        <AuthPage onLogin={() => setIsAuthenticated(true)} />
-      )}
-
-      {!showIntro && isAuthenticated && (
+      {!showIntro && (
         <>
           <Navbar />
           <HistorySidebar onLoadResult={handleHistoryLoad} />
