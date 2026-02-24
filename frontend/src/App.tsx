@@ -9,6 +9,7 @@ import PartialUpdate from './components/PartialUpdate';
 import Dashboard from './components/Dashboard';
 import HistorySidebar, { addToHistory } from './components/HistorySidebar';
 import IntroAnimation from './components/IntroAnimation';
+import ChatBot from './components/ChatBot';
 import type { AppMode, PredictResponse, DetectResponse } from './types';
 
 export default function App() {
@@ -107,6 +108,7 @@ export default function App() {
                 )}
               </AnimatePresence>
             </div>
+            <ChatBot />
             <Footer />
           </main>
         </>

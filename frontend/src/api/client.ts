@@ -21,6 +21,9 @@ export const detectPlastic = (files: Record<string, File>) => {
 export const predictPyrolysis = (payload: PredictPayload) =>
     api.post<PredictResponse>('/predict', payload);
 
+export const sendChatMessage = (message: string) =>
+    api.post<{ success: boolean; reply: string }>('/chat', { message });
+
 /* ─── Advanced Dashboard Endpoints ─────────────────────────── */
 
 export const advancedAIOptimize = (payload: Record<string, unknown>) =>
